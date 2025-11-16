@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: hw06_app
+    ports:
+      - "3000:3000"
+      - "5000:5000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: always
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: msg_db
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "mongodb://localhost:27017",
+          "--eval",
+          "db.runCommand({ ping: 1 }).ok",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mongo-data:
